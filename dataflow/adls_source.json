@@ -1,0 +1,36 @@
+{
+	"name": "adls_source",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "CSV_text",
+						"type": "DatasetReference"
+					},
+					"name": "adlsSalesDataSource"
+				}
+			],
+			"sinks": [],
+			"transformations": [],
+			"scriptLines": [
+				"source(output(",
+				"          ORDERNUMBER as short,",
+				"          QUANTITYORDERED as short,",
+				"          PRICEEACH as double,",
+				"          ORDERLINENUMBER as short,",
+				"          SALES as double,",
+				"          ORDERDATE as timestamp,",
+				"          STATUS as string,",
+				"          QTR_ID as short,",
+				"          MONTH_ID as short,",
+				"          YEAR_ID as short",
+				"     ),",
+				"     allowSchemaDrift: false,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> adlsSalesDataSource"
+			]
+		}
+	}
+}
