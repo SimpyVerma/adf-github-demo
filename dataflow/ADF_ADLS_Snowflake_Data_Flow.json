@@ -1,5 +1,5 @@
 {
-	"name": "adls_source",
+	"name": "ADF_ADLS_Snowflake_Data_Flow",
 	"properties": {
 		"type": "MappingDataFlow",
 		"typeProperties": {
@@ -12,8 +12,23 @@
 					"name": "adlsSalesDataSource"
 				}
 			],
-			"sinks": [],
-			"transformations": [],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "SnowflakeTableData",
+						"type": "DatasetReference"
+					},
+					"name": "SinkOfData"
+				}
+			],
+			"transformations": [
+				{
+					"name": "FilterONSalesAmount"
+				},
+				{
+					"name": "GroupBYYearIDMonthIDANDTotalSales"
+				}
+			],
 			"scriptLines": [
 				"source(output(",
 				"          ORDERNUMBER as short,",
@@ -29,7 +44,26 @@
 				"     ),",
 				"     allowSchemaDrift: false,",
 				"     validateSchema: false,",
-				"     ignoreNoFilesFound: false) ~> adlsSalesDataSource"
+				"     ignoreNoFilesFound: false) ~> adlsSalesDataSource",
+				"adlsSalesDataSource filter(SALES>=300) ~> FilterONSalesAmount",
+				"FilterONSalesAmount aggregate(groupBy(YEAR_ID,",
+				"          MONTH_ID),",
+				"     TotalSales = sum(SALES)) ~> GroupBYYearIDMonthIDANDTotalSales",
+				"GroupBYYearIDMonthIDANDTotalSales sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          YEAR_ID as string,",
+				"          MONTH_ID as string,",
+				"          TOTAL_SALES as string",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     stageInsert: true) ~> SinkOfData"
 			]
 		}
 	}
