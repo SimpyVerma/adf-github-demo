@@ -1,0 +1,9 @@
+{
+	"name": "1stadfaccount",
+	"location": "northeurope",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "de12d198-d44f-4ec0-b64e-64817fdf7de2",
+		"tenantId": "3d49da66-bfb5-4a99-9e07-553fd22d955b"
+	}
+}
