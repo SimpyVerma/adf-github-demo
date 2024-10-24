@@ -1,0 +1,36 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "1stadfaccount"
+		},
+		"AzureDataLakeStorage_IP1_accountKey": {
+			"value": ""
+		},
+		"AzureSynapseAnalytics_IP1_password": {
+			"value": ""
+		},
+		"CosmosDb_IP1_connectionString": {
+			"value": ""
+		},
+		"Snowflake_Linkage_password": {
+			"value": ""
+		},
+		"AzureDataLakeStorage_IP1_properties_typeProperties_url": {
+			"value": "https://industrialproject1.dfs.core.windows.net/"
+		},
+		"AzureSynapseAnalytics_IP1_properties_typeProperties_server": {
+			"value": "airbnb-customer-bookings-data.sql.azuresynapse.net"
+		},
+		"AzureSynapseAnalytics_IP1_properties_typeProperties_database": {
+			"value": "SynapseTable"
+		},
+		"AzureSynapseAnalytics_IP1_properties_typeProperties_userName": {
+			"value": "user"
+		},
+		"Snowflake_Linkage_properties_typeProperties_database": {
+			"value": "sales_mart"
+		}
+	}
+}
