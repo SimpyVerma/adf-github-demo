@@ -10,9 +10,28 @@
 						"type": "DatasetReference"
 					},
 					"name": "CopyBookingDataFromCosmos"
+				},
+				{
+					"dataset": {
+						"referenceName": "SynapseBooking",
+						"type": "DatasetReference"
+					},
+					"name": "LookupfromSynapse"
 				}
 			],
-			"sinks": [],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "SynapseBooking",
+						"type": "DatasetReference"
+					},
+					"name": "sink1",
+					"rejectedDataLinkedService": {
+						"referenceName": "AzureDataLakeStorage_IP1",
+						"type": "LinkedServiceReference"
+					}
+				}
+			],
 			"transformations": [
 				{
 					"name": "ConditionalSplit"
@@ -22,6 +41,12 @@
 				},
 				{
 					"name": "alterRow"
+				},
+				{
+					"name": "lookup1"
+				},
+				{
+					"name": "select1"
 				}
 			],
 			"scriptLines": [
@@ -43,11 +68,33 @@
 				"     enableChangeFeed: true,",
 				"     changeFeedStartFromTheBeginning: true,",
 				"     format: 'document') ~> CopyBookingDataFromCosmos",
+				"source(output(",
+				"          booking_id as string,",
+				"          property_id as string,",
+				"          customer_id as integer,",
+				"          owner_id as string,",
+				"          check_in_date as date,",
+				"          check_out_date as date,",
+				"          booking_date as timestamp,",
+				"          amount as double,",
+				"          currency as string,",
+				"          city as string,",
+				"          country as string,",
+				"          full_address as string,",
+				"          stay_duration as long,",
+				"          booking_year as integer,",
+				"          booking_month as integer,",
+				"          timestamp as timestamp",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     isolationLevel: 'READ_UNCOMMITTED',",
+				"     format: 'table',",
+				"     staged: true) ~> LookupfromSynapse",
 				"CopyBookingDataFromCosmos split(check_out_date<check_in_date,",
 				"     disjoint: false) ~> ConditionalSplit@(BadRecords, AcceptedRecords)",
 				"ConditionalSplit@AcceptedRecords derive(StayDuration = (toTimestamp(check_out_date)-toTimestamp(check_in_date))/8640000,",
-				"          Year = \r",
-				"year(toDate(toString(booking_date), 'yyyyMMdd')),",
+				"          Year = year(toDate(toString(booking_date), 'yyyyMMdd')),",
 				"          Month = month(toDate(toString(booking_date), 'yyyyMMdd')),",
 				"          Full_Address = concat(property_location.city , property_location.country),",
 				"          City = property_location.city,",
@@ -61,7 +108,68 @@
 				"          booking_date = booking_date,",
 				"          amount = amount,",
 				"          currency = currency) ~> derivedColumn1",
-				"derivedColumn1 alterRow() ~> alterRow"
+				"lookup1 alterRow(insertIf(isNull(LookupfromSynapse@booking_id)),",
+				"     updateIf(not(isNull(LookupfromSynapse@booking_id)))) ~> alterRow",
+				"derivedColumn1, LookupfromSynapse lookup(derivedColumn1@booking_id == LookupfromSynapse@booking_id,",
+				"     multiple: false,",
+				"     pickup: 'first',",
+				"     desc(LookupfromSynapse@timestamp, true),",
+				"     broadcast: 'auto')~> lookup1",
+				"alterRow select(mapColumn(",
+				"          booking_id = derivedColumn1@booking_id,",
+				"          property_id = derivedColumn1@property_id,",
+				"          customer_id = derivedColumn1@customer_id,",
+				"          owner_id = derivedColumn1@owner_id,",
+				"          check_in_date = derivedColumn1@check_in_date,",
+				"          check_out_date = derivedColumn1@check_out_date,",
+				"          booking_date = derivedColumn1@booking_date,",
+				"          amount = derivedColumn1@amount,",
+				"          currency = derivedColumn1@currency,",
+				"          property_location,",
+				"          timestamp = ConditionalSplit@AcceptedRecords@timestamp,",
+				"          StayDuration,",
+				"          Year,",
+				"          Month,",
+				"          Full_Address = derivedColumn1@Full_Address,",
+				"          City = derivedColumn1@City,",
+				"          Country = derivedColumn1@Country,",
+				"          stay_duration,",
+				"          booking_year,",
+				"          booking_month",
+				"     ),",
+				"     skipDuplicateMapInputs: false,",
+				"     skipDuplicateMapOutputs: false) ~> select1",
+				"select1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          booking_id as string,",
+				"          property_id as string,",
+				"          customer_id as integer,",
+				"          owner_id as string,",
+				"          check_in_date as date,",
+				"          check_out_date as date,",
+				"          booking_date as timestamp,",
+				"          amount as double,",
+				"          currency as string,",
+				"          city as string,",
+				"          country as string,",
+				"          full_address as string,",
+				"          stay_duration as long,",
+				"          booking_year as integer,",
+				"          booking_month as integer,",
+				"          timestamp as timestamp",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:true,",
+				"     upsertable:false,",
+				"     keys:[(booking_id)],",
+				"     format: 'table',",
+				"     staged: true,",
+				"     allowCopyCommand: true,",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     errorHandlingOption: 'stopOnFirstError') ~> sink1"
 			]
 		}
 	}
