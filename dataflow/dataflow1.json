@@ -125,7 +125,6 @@
 				"          booking_date = derivedColumn1@booking_date,",
 				"          amount = derivedColumn1@amount,",
 				"          currency = derivedColumn1@currency,",
-				"          property_location,",
 				"          timestamp = ConditionalSplit@AcceptedRecords@timestamp,",
 				"          StayDuration,",
 				"          Year,",
