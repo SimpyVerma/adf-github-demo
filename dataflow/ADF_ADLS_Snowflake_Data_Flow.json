@@ -5,10 +5,6 @@
 		"typeProperties": {
 			"sources": [
 				{
-					"dataset": {
-						"referenceName": "CSV_text",
-						"type": "DatasetReference"
-					},
 					"name": "adlsSalesDataSource"
 				}
 			],
@@ -43,8 +39,7 @@
 				"          YEAR_ID as short",
 				"     ),",
 				"     allowSchemaDrift: false,",
-				"     validateSchema: false,",
-				"     ignoreNoFilesFound: false) ~> adlsSalesDataSource",
+				"     validateSchema: false) ~> adlsSalesDataSource",
 				"adlsSalesDataSource filter(SALES>=300) ~> FilterONSalesAmount",
 				"FilterONSalesAmount aggregate(groupBy(YEAR_ID,",
 				"          MONTH_ID),",
