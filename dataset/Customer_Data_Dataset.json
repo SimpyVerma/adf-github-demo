@@ -10,7 +10,8 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
-				"fileSystem": "customer-data"
+				"folderPath": "customer-data",
+				"fileSystem": "firstindustrialproject"
 			},
 			"columnDelimiter": ",",
 			"escapeChar": "\\",
