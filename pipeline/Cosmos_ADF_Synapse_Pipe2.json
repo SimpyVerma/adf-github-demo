@@ -30,7 +30,10 @@
 						"coreCount": 8,
 						"computeType": "General"
 					},
-					"traceLevel": "Fine",
+					"traceLevel": "None",
+					"cacheSinks": {
+						"firstRowOnly": true
+					},
 					"continuationSettings": {
 						"customizedCheckpointKey": "5f10aaed-2098-4921-bdaf-70795c5e186a"
 					}
